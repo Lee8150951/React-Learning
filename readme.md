@@ -53,3 +53,21 @@
 </html>
 ````
 
+另外，也可以使用原生的JavaScript创建虚拟DOM，但是非常麻烦并不建议这样书写
+
+````javascript
+// 1、创建虚拟dom
+// React.createElement(标签名, 标签属性, 标签内容)
+const VDOM = React.createElement('h1', {id: 'title'}, 'Hello React!')
+// 2、使用React渲染虚拟dom到界面
+ReactDOM.render(VDOM, document.getElementById('test'))
+````
+
+### 4、虚拟DOM和真实DOM
+
+1）本质是Object类型的对象（一般对象）；
+
+2）和真实DOM区别在于，虚拟DOM更加轻量；
+
+3）虚拟DOM最终会被React转化为真实DOM，呈现在页面上
+
