@@ -159,3 +159,146 @@ const VDOM = (
 ReactDOM.render(VDOM, document.getElementById('test'))
 ````
 
+## 二、面向组件编程
+
+### 1、函数式组件
+
+> 什么是组件？
+>
+> 1）理解：用来实现局部功能效果的代码和资源的集合（html、css、js、image等等）
+>
+> 2）为什么要用组件：一个界面的功能更加复杂
+>
+> 3）复用编码，简化项目编码，提高运行效率
+
+```javascript
+// 1、创建函数式组件
+function Demo() {
+  return <h2>函数式组件</h2>
+}
+// 2、渲染组件到页面
+ReactDOM.render(<Demo/>, document.getElementById('test'))
+```
+
+**注意：函数式组件针对的是较为简单的组件，不适用于大型组件**
+
+另外，在上述代码中值得注意的有两点：
+
+① 函数名和标签名必须是大写字母开头，不能小写！（如果是小写，浏览器会默认该标签属于html自带标签而发出警告并读取失败）
+
+② 在ReactDOM.render()中，第一个参数引入的一定是一个**闭合**标签，而不是函数名
+
+> 代码在执行了`ReactDOM.render(<Demo/>, document.getElementById('test'))`后发生的一系列步骤：
+>
+> 1、React解析组件标签，找到名为Demo的组件；
+>
+> 2、发现组件是由函数定义的，随后调用该函数，键返回的虚拟DOM转化为真实DOM并呈现在页面中。
+
+### 2、JavaScript类的相关知识
+
+新建类的关键字：`class`
+
+创建实例对象关键字：`new`
+
+```javascript
+// 1、创建Person类
+class Person {
+  // 构造器方法
+  constructor(name, age) {
+    // 构造器中的this指的是类的实例对象
+    this.name = name
+    this.age = age
+  }
+  // 一般方法
+  speak() {
+    // 通过Person实例调用speak时，speak中的this就是Person实例 
+    console.log(`name: ${this.name}, age: ${this.age}`)
+  }
+}
+// 2、创建Person实例对象
+const p1 = new Person('tom', 18)
+p1.speak()
+const p2 = new Person('jerry', 20)
+p2.speak()
+```
+
+在JavaScript中没有类似Java中对于类属性的定义方法，也没有Getter和Setter方法，就是通过Constructor方法（构造器的方法）对其进行相关功能实现。
+
+另外注意：在类中定义方法不要写function ***() { }来对方法进行构造，直接写方法名即可
+
+**函数的继承**：
+
+使用继承后该类已经继承了Person中所有的属性和方法
+
+构造器如果没必要添加新词条时不需要进行重写的
+
+但是如果一旦构造器需要进行修改就一定要使用super（超类）
+
+ super()中的参数即使所继承类的所有构造器属性（避免了大量对已继承属性的复写）
+
+```javascript
+class Person {
+    // 构造器方法
+    constructor(name, age) {
+        // 构造器中的this指的是类的实例对象
+        this.name = name
+        this.age = age
+    }
+    // 一般方法
+    speak() {
+        console.log(`name: ${this.name}, age: ${this.age}`)
+    }
+}
+// 继承类对象
+class Student extends Person {
+    // 使用继承后该类已经继承了Person中所有的属性和方法
+    // 构造器如果没必要添加新词条时不需要进行重写的
+    // 但是如果一旦构造器需要进行修改就一定要使用super（超类）
+    // super()中的参数即使所继承类的所有构造器属性（避免了大量对已继承属性的复写）
+    constructor(name, age, grade) {
+        super(name, age)
+        this.grade = grade
+    }
+
+    // 对原方法的重写
+    speak() {
+      console.log(`name: ${this.name}, age: ${this.age}, grade: ${this.grade}`)
+    }
+}
+```
+
+> 总结：
+>
+> 1、类中的构造器不是必须写的，要对实例进行一些实例化的操作，如添加指定属性才写；
+>
+> 2、如果A类继承了B类，且A类中写了构造器，那么A类构造器中的super必须要被调用；
+>
+> 3、类中所定义的方法都是放在类的原型对象上，供实例去使用。
+
+### 3、类式组件
+
+基本使用方式：
+
+```javascript
+// 1、创建类式组件
+class Demo extends React.Component {
+    render() {
+        return (
+            <h2>函数式组件</h2>
+        )
+    }
+}
+// 2、渲染
+ReactDOM.render(<Demo/>, document.getElementById('test'))
+```
+
+> 代码在执行了`ReactDOM.render(<Demo/>, document.getElementById('test'))`后发生的一系列步骤：
+>
+> 1、React解析组件标签，找到名为Demo的组件；
+>
+> 2、发现组件是由类定义的，随后new该类的实例，并通过该实例调用到原型上的render方法；
+>
+> 3、将render返回的虚拟DOM转为真实DOM，随后呈现在页面中
+
+### 4、组件的三大属性
+

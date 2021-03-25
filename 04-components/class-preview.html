@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 1、创建Person类
+    class Person {
+      // 构造器方法
+      constructor(name, age) {
+        // 构造器中的this指的是类的实例对象
+        this.name = name
+        this.age = age
+      }
+      // 一般方法
+      speak() {
+        console.log(`name: ${this.name}, age: ${this.age}`)
+      }
+    }
+    // 继承类对象
+    class Student extends Person {
+      // 使用继承后该类已经继承了Person中所有的属性和方法
+      // 构造器如果没必要添加新词条时不需要进行重写的
+
+      // 但是如果一旦构造器需要进行修改就一定要使用super（超类）
+      // super()中的参数即使所继承类的所有构造器属性（避免了大量对已继承属性的复写）
+      constructor(name, age, grade) {
+        super(name, age)
+        this.grade = grade
+      }
+
+      // 对原方法的重写
+      speak() {
+        console.log(`name: ${this.name}, age: ${this.age}, grade: ${this.grade}`)
+      }
+    }
+    // 2、创建Person实例对象
+    const p1 = new Person('tom', 18)
+    p1.speak()
+    const s2 = new Student('jerry', 20, "master")
+    s2.speak()
+  </script>
+</body>
+</html>
