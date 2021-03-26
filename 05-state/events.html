@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 准备容器 -->
+  <div id="test"></div>
+
+  <!-- 引入react核心库 -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/react.min.js"></script>
+  <!-- 引入react-dom，用于操作dom -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/react-dom.min.js"></script>
+  <!-- 引入babel，用于将jsx转化为js，将ES6转化为ES5语法 -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/babel.min.js"></script>
+
+  <script type="text/babel">
+    // 1、常见类式组件
+    class Weather extends React.Component {
+      constructor(props) {
+        super(props)
+        this.state = {
+          isHot: false,
+          isWind: true
+        }
+        // bind的作用：生成新的函数；更改函数中的this
+        this.changeWeather = this.changeWeather.bind(this)
+      }
+      render() {
+        console.log(this)
+        return (
+          <h2 onClick={this.changeWeather}>
+            天气{this.state.isHot ? '炎热' : '凉爽'}，
+            {this.state.isWind ? '刮' : '不刮'}风
+          </h2>
+        )
+      }
+      // 定义方法
+      changeWeather() {
+        const isHot = this.state.isHot
+        const isWind = this.state.isWind
+        // 状态的更新必须通过setState进行修改
+        // 更新的动作只对指定元素进行修改，不影响其他state元素
+        this.setState({
+          isHot: !isHot,
+          isWind: !isWind
+        })
+      }
+    }
+    // 2、渲染
+    ReactDOM.render(<Weather/>, document.getElementById('test'))
+  </script>
+</body>
+</html>

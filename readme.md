@@ -302,3 +302,119 @@ ReactDOM.render(<Demo/>, document.getElementById('test'))
 
 ### 4、组件的三大属性
 
+在每一个React组件中都含有三个属性：state，props，refs
+
+#### （1）state
+
+> 基本使用：在组件使用state属性时应该在构建组件时加上一个构造器，这个构造器获取的是props值（注意：一定要使用super()对参数进行一个接收），然后再通过this.state的方式写入state需求的数据**（注意：通过对象的方式）**
+
+```javascript
+class Weather extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            isHot: false
+        }
+    }
+    render() {
+        console.log(this);
+        return (
+            <h2>天气{this.state.isHot ? '炎热' : '凉爽'}</h2>
+		)
+	}
+}
+```
+
+**注意：状态不可以直接更改，要借助一个内置的API--> setState 去修改**
+
+```javascript
+class Weather extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            isHot: false
+        }
+        // bind的作用：生成新的函数；更改函数中的this
+        this.changeWeather = this.changeWeather.bind(this)
+    }
+    render() {
+        console.log(this)
+        return (
+            <h2 onClick={this.changeWeather}>天气{this.state.isHot ? '炎热' : '凉爽'}</h2>
+        )
+	}
+    // 定义方法
+    changeWeather() {
+        const isHot = this.state.isHot
+        // 状态的更新必须通过setState进行修改
+        this.setState({
+            isHot: !isHot
+        })
+    }
+}
+```
+
+值得关注的是，通过setState方法更新只对指定元素进行修改，不影响其他state元素
+
+总结：React类组件构造器的作用有两个
+
+① 初始化数据状态；
+
+② 解决this指向问题
+
+```javascript
+constructor(props) {
+    super(props)
+    this.state = {
+        isHot: false,
+        isWind: true
+    }
+    // bind的作用：生成新的函数；更改函数中的this
+    this.changeWeather = this.changeWeather.bind(this)
+}
+```
+
+**React对State的重构（标准写法）：**
+
+```javascript
+<script type="text/babel">
+  // 1、常见类式组件
+  class Weather extends React.Component {
+    state = {
+      isHot: false,
+      isWind: true
+    }
+    render() {
+      console.log(this)
+      return (
+        <h2 onClick={this.changeWeather}>
+          天气{this.state.isHot ? '炎热' : '凉爽'}，
+          {this.state.isWind ? '刮' : '不刮'}风
+        </h2>
+      )
+    }
+    // 定义方法
+    // 箭头函数的this找的是其外层函数的this作为本箭头函数的this
+    changeWeather = () => {
+      const isHot = this.state.isHot
+      const isWind = this.state.isWind
+      this.setState({
+        isHot: !isHot,
+        isWind: !isWind
+      })
+    }
+  }
+  // 2、渲染
+  ReactDOM.render(<Weather/>, document.getElementById('test'))
+</script>
+```
+
+> state使用总结：
+>
+> 1、组件中render方法中的this为组件实例对象
+>
+> 2、组件自定义方法要使用赋值式的箭头函数
+>
+> 3、数据状态的更新要使用setState方法
+>
+> 4、state通过赋值的方式（不要挂载在构造器中），并通过对象键值对的方式赋值，不可以采用数组
