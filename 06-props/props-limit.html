@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 准备容器 -->
+  <div id="test"></div>
+
+  <!-- 引入react核心库 -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/react.min.js"></script>
+  <!-- 引入react-dom，用于操作dom -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/react-dom.min.js"></script>
+  <!-- 引入babel，用于将jsx转化为js，将ES6转化为ES5语法 -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/babel.min.js"></script>
+
+  <script type="text/babel">
+    class Person extends React.Component {
+      render() {
+        // 解构赋值
+        const {name, sex, age} = this.props
+        return (
+          <ul>
+            <li>Name: {name}</li>
+            <li>Sex: {sex}</li>
+            <li>Age: {age}</li>
+          </ul>
+        )
+      }
+    }
+    // 属性规则制定
+    // 在React16后无法直接使用React.PropTypes进行使用，需要单独引入prop-type.js进行使用
+    // 但是由于下不到这个js文件，下面的代码无法运行（但是语法是对的）
+    Person.propTypes = {
+      // 限制字符串，必填
+      name: PropTypes.string.isRequired,
+      // 限制字符串
+      sex: PropTypes.string,
+      // 限制数值
+      age: PropTypes.number,
+      // 限制函数(一定是func不是function)
+      speak: PropTypes.func
+    }
+    // 指定默认值
+    Person.defaultProps = {
+      sex: 'male',
+      age: 20
+    }
+    ReactDOM.render(<Person name="jacob" age="18" sex="male" demo={demo}/>, document.getElementById('test'))
+
+    function demo() {
+      console.log('this is a demo');
+    }
+  </script>
+</body>
+</html>

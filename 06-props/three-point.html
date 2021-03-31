@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 展开数组
+    let arr1 = [1, 3, 5]
+    let arr2 = [2, 4, 6]
+    console.log(...arr1)
+
+    // 合并数组
+    let arr3 = [...arr1, ...arr2]
+    console.log(arr3)
+
+    // 函数构建（非固定参数）
+    function sum(...nums) {
+      return nums.reduce((preValue, currentValue) => {
+        return preValue + currentValue
+      })
+    }
+    console.log(sum(1, 3, 5, 7, 9));
+
+    // 使用{...}的方式复制对象
+    let person = {name: 'jacob', age: 20}
+    let person2 = {...person}
+    let person3 = person
+    person.name = 'lee'
+    console.log(person, person2, person3)
+  </script>
+</body>
+</html>

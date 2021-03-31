@@ -418,3 +418,332 @@ constructor(props) {
 > 3、数据状态的更新要使用setState方法
 >
 > 4、state通过赋值的方式（不要挂载在构造器中），并通过对象键值对的方式赋值，不可以采用数组
+
+#### （2）props
+
+props和state的区别在于state更加倾向于组件内部的事情，而props则是组件外部通过方法传进来的值
+
+**首先注意：props是只读的**
+
+基本使用形式：
+
+```javascript
+class Person extends React.Component {
+  render() {
+    // 解构赋值
+    const {name, sex, age} = this.props
+    return (
+      <ul>
+        <li>Name: {name}</li>
+        <li>Sex: {sex}</li>
+        <li>Age: {age}</li>
+      </ul>
+    )
+  }
+}
+ReactDOM.render(<Person name="tom" age="18" sex="male"/>, document.getElementById('test'))
+```
+
+可以理解成HTML标签中都是一个个键值对构成，React将这些键值对解析成了自带props对象中的键值对，构成了一个props
+
+这种适用形式固然简单，但是也是一种将值写固定且信息非常少的情况
+
+在应对项目时，可以将值写成一个对象，使用在ES6中的拓展语法`...`（三点运算符）在标签中直接引入即可
+
+```javascript
+class Person extends React.Component {
+    render() {
+        // 解构赋值
+        const {name, sex, age} = this.props
+        return (
+            <ul>
+            	<li>Name: {name}</li>
+            	<li>Sex: {sex}</li>
+            	<li>Age: {age}</li>
+          	</ul>
+        )
+	}
+}
+// 模拟后台传来的数据
+const p = {name: 'tom', age: '18', sex: 'male'}
+ReactDOM.render(<Person {...p}/>, document.getElementById('test'))
+```
+
+**props数据限制：**
+
+在React16之后，需要从外部引入prop-type.js对标签属性进行限制
+
+```javascript
+ <script type="text/babel">
+    class Person extends React.Component {
+      	render() {
+        	// 解构赋值
+        	const {name, sex, age} = this.props
+        	return (
+          	<ul>
+            	<li>Name: {name}</li>
+            	<li>Sex: {sex}</li>
+            	<li>Age: {age}</li>
+          	</ul>
+        	)
+      	}
+    }
+    // 属性规则制定
+    // 在React16后无法直接使用React.PropTypes进行使用，需要单独引入prop-type.js进行使用
+    // 但是由于下不到这个js文件，下面的代码无法运行（但是语法是对的）
+    Person.propTypes = {
+      	// 限制字符串，必填
+      	name: PropTypes.string.isRequired,
+      	// 限制字符串
+      	sex: PropTypes.string,
+      	// 限制数值
+      	age: PropTypes.number,
+      	// 限制函数(一定是func不是function)
+      	speak: PropTypes.func
+    }
+    // 指定默认值
+    Person.defaultProps = {
+      	sex: 'male',
+      	age: 20
+    }
+    ReactDOM.render(<Person name="jacob" age="18" sex="male" demo={demo}/>, document.getElementById('test'))
+
+    function demo() {
+      	console.log('this is a demo');
+    }
+</script>
+```
+
+另外props可以简写，方法如下所示：
+
+```javascript
+<script type="text/babel">
+    class Person extends React.Component {
+      	// 属性规则制定
+      	static propTypes = {
+        	name: PropTypes.string.isRequired,
+        	sex: PropTypes.string,
+        	age: PropTypes.number,
+        	speak: PropTypes.func
+      	}
+      	// 指定默认值
+      	static defaultProps = {
+        	sex: 'male',
+        	age: 20
+      	}
+      	render() {
+        	// 解构赋值
+        	const {name, sex, age} = this.props
+        
+        	return (
+          		<ul>
+            		<li>Name: {name}</li>
+            		<li>Sex: {sex}</li>
+            		<li>Age: {age}</li>
+          		</ul>
+        	)
+      	}
+    }
+    ReactDOM.render(<Person name="jacob" age="18" sex="male" demo={demo}/>, document.getElementById('test'))
+
+    function demo() {
+      	console.log('this is a demo');
+    }
+ </script>
+```
+
+函数式组件也可以使用props，但是三大属性中的另外两个：state和refs都不能使用，使用方法如下
+
+```javascript
+<script type="text/babel">
+    function Person (props) {
+      	const {name, age, sex} = props
+      	return (
+        	<ul>
+          		<li>Name: {name}</li>
+          		<li>Sex: {sex}</li>
+          		<li>Age: {age}</li>
+        	</ul>
+      	)
+    }
+    ReactDOM.render(<Person name="jacob" age="18" sex="male"/>, document.getElementById('test'))
+ </script>
+```
+
+#### （3）refs
+
+**字符串式的refs**
+
+在React组件的标签中可以有一个ref属性（其实功能与原生的id非常相似），React会将所有拥有ref属性的标签以键值对的方式进行存储，key是ref值，而value是该ref值所在标签实例
+
+```javascript
+class Demo extends React.Component {
+	render() {
+        return (
+          	<div>
+            	<input ref="input1" type="text" placeholder="Click"/>
+            	<button ref="btn" onClick={this.showData}>Click</button>
+            	<input ref="input2" type="text" placeholder="Blur"/>
+          	</div>
+        )
+	}
+    // 展示左侧输入框的数据
+    showData = () => {
+        console.log(this)
+        console.log(this.refs.input1)
+    }
+}
+// 渲染组件
+ReactDOM.render(<Demo/>, document.getElementById("test"))
+```
+
+控制台结果：
+
+![demo.PNG](https://i.loli.net/2021/03/31/3qVHD5M8gZBJlLO.png)
+
+**注意：这个地方取到的是真实DOM，并非虚拟DOM**
+
+> React官方由于效率问题已经基本弃用字符串模式refs
+
+**回调形式的refs**
+
+```javascript
+class Demo extends React.Component {
+    render() {
+        return (
+          	<div>
+            	<input ref={c => this.input1 = c} type="text" placeholder="Click"/>
+            	<button onClick={this.showData}>Click</button>
+            	<input ref={c => this.input2 = c} type="text" placeholder="Click"/>
+          	</div>
+        )
+	}
+    // 展示左侧输入框的数据
+    showData = () => {
+        const {input1} = this
+        alert(input1.value)
+    }
+}
+// 渲染组件
+ReactDOM.render(<Demo/>, document.getElementById("test"))
+```
+
+> 注意：标签中的ref不能更改成别的关键字，因为一旦使用ref，React才会自动将当前节点写入键值对中
+
+**官方建议的类绑定模式refs**
+
+```javascript
+class Demo extends React.Component {
+    render() {
+        return (
+         	<div>
+            	<input ref={this.saveInput} type="text" placeholder="Click"/>
+            	<button onClick={this.showData}>Click</button>
+          	</div>
+        )
+	}
+    // 保存输入框信息
+    saveInput = (c) => {
+        this.input1 = c
+    }
+    // 展示左侧输入框的数据
+    showData = () => {
+        const {input1} = this
+        alert(input1.value)
+    }
+}
+// 渲染组件
+ReactDOM.render(<Demo/>, document.getElementById("test"))
+```
+
+使用官方指定的方式无论如何更新都不会重复调用绑定的回调函数，因为已经绑定到了实例自身，但是大多数情况下无关紧要
+
+**新API：CreateRef()**
+
+这种方式是目前React最推荐的模式
+
+```javascript
+class Demo extends React.Component {
+	// React.createRef调用后可以返回一个容器，该容器可以存储被ref所标识的节点
+	// 该容器是专人专用的，也就是说里面只能存一个ref，它的key就是current
+    myRef = React.createRef()
+    render() {
+        return (
+          	<div>
+            	<input ref={this.myRef} type="text" placeholder="Click"/>
+            	<button onClick={this.showData}>Click</button>
+          	</div>
+        )
+	}
+    // 展示左侧输入框的数据
+    showData = () => {
+        alert(this.myRef.current.value)
+    }
+}
+// 渲染组件
+ReactDOM.render(<Demo/>, document.getElementById("test"))
+```
+
+### 5、事件处理
+
+> 1）通过onXxx属性指定事件的处理函数（尤其要注意大小写）
+>
+> ​	a.React使用的是自定义（合成）事件，而不是使用原生的DOM事件  -------为了更好的兼容性
+>
+> ​	b.React中的时间是通过事件委托方式处理的（委托给数组最外层的元素）  -------为了高效性
+>
+> 2）通过event.target得到发生时间的DOM元素对象
+
+在触发了相关事件后，React会自动将该事件的对象传入对应的方法中，使用event.target即可直接获取当前操作的Dom元素
+
+```javascript
+class Demo extends React.Component {
+    render() {
+        return (
+          	<div>
+            	<input onBlur={this.blurData} type="text" placeholder="Click"/>
+          	</div>
+        )
+	}
+    blurData = (event) => {
+        console.log(event.target.value)
+    }
+}
+// 渲染组件
+ReactDOM.render(<Demo/>, document.getElementById("test"))
+```
+
+### 6、补充：三点运算符`...`
+
+对象中的扩展运算符(...)用于取出参数对象中的所有可遍历属性，拷贝到当前对象之中
+
+**注意：三点运算符不可以展开对象，但是可以使用{...object}的方式构造字面量对象**
+
+```javascript
+<script>
+    // 展开数组
+    let arr1 = [1, 3, 5]
+    let arr2 = [2, 4, 6]
+    console.log(...arr1)
+
+    // 合并数组
+    let arr3 = [...arr1, ...arr2]
+    console.log(arr3)
+
+    // 函数构建（非固定参数）
+    function sum(...nums) {
+      	return nums.reduce((preValue, currentValue) => {
+        	return preValue + currentValue
+      	})
+    }
+    console.log(sum(1, 3, 5, 7, 9));
+
+    // 使用{...}的方式复制对象
+    let person = {name: 'jacob', age: 20}
+    let person2 = {...person}
+    let person3 = person
+    person.name = 'lee'
+    console.log(person, person2, person3)
+</script>
+```
+

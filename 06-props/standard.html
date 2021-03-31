@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 准备容器 -->
+  <div id="test"></div>
+
+  <!-- 引入react核心库 -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/react.min.js"></script>
+  <!-- 引入react-dom，用于操作dom -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/react-dom.min.js"></script>
+  <!-- 引入babel，用于将jsx转化为js，将ES6转化为ES5语法 -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/babel.min.js"></script>
+
+  <script type="text/babel">
+    class Person extends React.Component {
+      // 属性规则制定
+      static propTypes = {
+        name: PropTypes.string.isRequired,
+        sex: PropTypes.string,
+        age: PropTypes.number,
+        speak: PropTypes.func
+      }
+      // 指定默认值
+      static defaultProps = {
+        sex: 'male',
+        age: 20
+      }
+      render() {
+        // 解构赋值
+        const {name, sex, age} = this.props
+        
+        return (
+          <ul>
+            <li>Name: {name}</li>
+            <li>Sex: {sex}</li>
+            <li>Age: {age}</li>
+          </ul>
+        )
+      }
+    }
+    ReactDOM.render(<Person name="jacob" age="18" sex="male" demo={demo}/>, document.getElementById('test'))
+
+    function demo() {
+      console.log('this is a demo');
+    }
+  </script>
+</body>
+</html>

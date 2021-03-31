@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 准备容器 -->
+  <div id="test"></div>
+
+  <!-- 引入react核心库 -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/react.min.js"></script>
+  <!-- 引入react-dom，用于操作dom -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/react-dom.min.js"></script>
+  <!-- 引入babel，用于将jsx转化为js，将ES6转化为ES5语法 -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/babel.min.js"></script>
+
+  <script type="text/babel">
+    class Demo extends React.Component {
+      render() {
+        return (
+          <div>
+            <input ref="input1" type="text" placeholder="Click"/>
+            <button ref="btn" onClick={this.showData}>Click</button>
+            <input ref="input2" onBlur={this.blurData} type="text" placeholder="Blur"/>
+          </div>
+        )
+      }
+      // 展示左侧输入框的数据
+      showData = () => {
+        console.log(this)
+        alert(this.refs.input1)
+      }
+      // 展示失去焦点
+      blurData = () => {
+        alert(this.refs.input2.value)
+      }
+    }
+    // 渲染组件
+    ReactDOM.render(<Demo/>, document.getElementById("test"))
+  </script>
+</body>
+</html>

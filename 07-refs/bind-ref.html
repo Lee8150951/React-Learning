@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 准备容器 -->
+  <div id="test"></div>
+
+  <!-- 引入react核心库 -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/react.min.js"></script>
+  <!-- 引入react-dom，用于操作dom -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/react-dom.min.js"></script>
+  <!-- 引入babel，用于将jsx转化为js，将ES6转化为ES5语法 -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/babel.min.js"></script>
+
+  <script type="text/babel">
+    class Demo extends React.Component {
+      render() {
+        return (
+          <div>
+            <input ref={this.saveInput} type="text" placeholder="Click"/>
+            <button onClick={this.showData}>Click</button>
+          </div>
+        )
+      }
+      // 保存输入框信息
+      saveInput = (c) => {
+        this.input1 = c
+      }
+      // 展示左侧输入框的数据
+      showData = () => {
+        const {input1} = this
+        alert(input1.value)
+      }
+    }
+    // 渲染组件
+    ReactDOM.render(<Demo/>, document.getElementById("test"))
+  </script>
+</body>
+</html>
