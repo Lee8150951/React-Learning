@@ -713,7 +713,69 @@ class Demo extends React.Component {
 ReactDOM.render(<Demo/>, document.getElementById("test"))
 ```
 
-### 6、补充：三点运算符`...`
+### 6、受控与非受控组件
+
+非受控组件（数据现用现取）
+
+```javascript
+class Login extends React.Component {
+    render() {
+        return (
+          	<form action="" onSubmit={this.handleSubmit}>
+            	用户名：<input ref={c => this.username = c} type="text" name="username" id=""/> 
+            	密码：<input ref={c => this.password = c} type="password" name="password" id=""/> 
+            	<button>登录</button>
+          	</form>
+        )
+	}
+    handleSubmit = (event) => {
+        // 组织表单提交默认配置（提交）
+        event.preventDefault()
+        const {username, password} = this
+        alert(username.value, password.value)
+    }
+}
+// 渲染组件
+ReactDOM.render(<Login/>, document.getElementById("test"))
+```
+
+受控式组件（更加推荐，便于维护），将所有信息存在state中进行维护
+
+```javascript
+class Login extends React.Component {
+    // 初始化状态
+    state = {
+        username: '',
+        password: ''
+    }
+	render() {
+        return (
+            <form onSubmit={this.handleSubmit}>
+            	用户名：<input onChange={this.saveUsername} ref={c => this.username = c} type="text" name="username" id=""/> 
+            	密码：<input onChange={this.savePassword} ref={c => this.password = c} type="password" name="password" id=""/> 
+            	<button>登录</button>
+          	</form>
+        )
+	}
+    handleSubmit = (event) => {
+        // 组织表单提交默认配置（提交）
+        event.preventDefault()
+        const {username, password} = this.state
+        console.log(username)
+        console.log(password)
+    }
+    saveUsername = (event) => {
+        this.setState({username:event.target.value})
+    }
+    savePassword = (event) => {
+        this.setState({password:event.target.value})
+    }
+}
+// 渲染组件
+ReactDOM.render(<Login/>, document.getElementById("test"))
+```
+
+### 7、补充：三点运算符`...`
 
 对象中的扩展运算符(...)用于取出参数对象中的所有可遍历属性，拷贝到当前对象之中
 
@@ -746,4 +808,51 @@ ReactDOM.render(<Demo/>, document.getElementById("test"))
     console.log(person, person2, person3)
 </script>
 ```
+
+### 8、ES6函数及柯里化
+
+**注意：在jsx语法中`{}`触发的是一个回调函数，也就是说，获取的是该函数的return值，这个return可以是函数、变量等等**
+
+```javascript
+class Login extends React.Component {
+    // 初始化状态
+    state = {
+        username: '',
+        password: ''
+    }
+	render() {
+        return (
+            <form onSubmit={this.handleSubmit}>
+            	用户名：<input onChange={this.saveForm("username")} ref={c => this.username = c} type="text" name="username" id=""/> 
+            	密码：<input onChange={this.saveForm("password")} ref={c => this.password = c} type="password" name="password" id=""/> 
+            	<button>登录</button>
+          	</form>
+        )
+	}
+    handleSubmit = (event) => {
+        // 组织表单提交默认配置（提交）
+        event.preventDefault()
+        const {username, password} = this.state
+        console.log(username)
+        console.log(password)
+    }
+    saveForm = (dataType) => {
+        return (event) => {
+          	this.setState({[dataType]: event.target.value})
+        }
+    }
+}
+// 渲染组件
+ReactDOM.render(<Login/>, document.getElementById("test"))
+```
+
+> 高阶函数：如果一个函数符合以下两个规范中的任何一个，那这个函数就是高阶函数
+>
+> 1、若A函数接受单参数是一个函数，那么A就可以称之为高阶函数
+>
+> 2、若A函数调用的返回值依然是一个函数，那么A就可以称之为高阶函数
+
+常见的高阶函数：Promise，setTimeout，arr.map()等等
+
+**函数的柯里化：通过函数调用继续返回函数的方式，实现多次接收参数的最后统一处理函数编码形式**
 
