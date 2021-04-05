@@ -856,3 +856,372 @@ ReactDOM.render(<Login/>, document.getElementById("test"))
 
 **函数的柯里化：通过函数调用继续返回函数的方式，实现多次接收参数的最后统一处理函数编码形式**
 
+## 三、React生命周期
+
+类似于Vue.js的生命周期构造，React中也存在生命周期的构造问题，描述了一个组件由”出生“到”死亡“的一个过程
+
+> 当组件第一次被渲染到 DOM 中的时候，在 React 中被称为“挂载（mount）”。
+>
+> 当 DOM 中组件被删除的时候，在 React 中被称为“卸载（unmount）”。
+
+### 1、旧生命周期
+
+旧React生命周期流程Ⅰ：
+
+![16775500-8d325f8093591c76.jpg](https://i.loli.net/2021/04/02/4RxX5GaNo7bl2Pu.jpg)
+
+旧生命周期原理图Ⅱ：
+
+![捕获.PNG](https://i.loli.net/2021/04/02/sRkba2hXMPgu6OB.png)
+
+以上这些方法都叫**React生命周期方法**
+
+```javascript
+class Demo extends React.Component {
+    // 构造器方法，完成初始化工作
+    constructor(props) {
+        console.log('Count---constructor')
+        super(props)
+        // 初始化状态
+        this.state = {count: 0}
+    }
+    
+    // 加一方法
+    add = () => {
+        let {count} = this.state
+        this.setState({count: count + 1})
+    }
+    // 卸载组件方法
+    death = () => {
+        ReactDOM.unmountComponentAtNode(document.getElementById('test'))
+    }
+    
+    // componentWillMount方法，组件将要挂载的钩子
+    componentWillMount() {
+        console.log("Count---componentWillMount")
+    }
+
+	// render方法，渲染时的钩子
+	render() {
+        console.log("Count---render")
+        const {count} = this.state
+        return (
+          	<div>
+            	<h2>当前求和：{count}</h2>
+            	<button onClick={this.add}>Click +1</button>
+            	<button onClick={this.death}>Death</button>
+          	</div>
+        )
+	}
+    
+    // componentDidMount方法，挂载完成后的钩子
+    componentDidMount() {
+        console.log("Count---componentDidMount")
+    }
+
+	// componentWillUnmount方法，卸载组件前的钩子
+    componentWillUnmount() {
+        console.log("Count---componentWillUnmount")
+    }
+
+    // shouldComponentUpdate方法，相当于一个阀门，控制setState方法是否能修改状态
+    // 默认返回的是true，如果返回false，将无法进行任何组件state的更新
+    shouldComponentUpdate() {
+        console.log("Count---shouldComponentUpdate")
+        return true
+    }
+
+    // componentWillUpdate方法，组件将要更新的钩子
+    componentWillUpdate() {
+        console.log("Count---componentWillUpdate")
+    }
+
+    // componentDidUpdate方法，组件更新完成的钩子
+    componentDidUpdate() {
+        console.log("Count---componentDidUpdate")
+    }
+}
+
+class A extends React.Component {
+    // 初始化状态
+    state = {
+        carName: 'Lexus'
+    }
+
+    changeCar = () => {
+      	this.setState({
+          	carName: 'Benz'
+        })
+    }
+
+    render() {
+       	return (
+          	<div>
+            	<h2>A组件</h2>
+            	<B carName={this.state.carName}/>
+            	<button onClick={this.changeCar}>Change</button>
+          	</div>
+        )
+	}
+}
+
+class B extends React.Component {
+    // componentWillReceiveProps方法，父组件传递props值调用的钩子
+    // 第一传的Props不算
+    componentWillReceiveProps() {
+        console.log("B---componentWillReceiveProps");
+    }
+    render() {
+        return (
+          	<h2>B组件，接收：{this.props.carName}</h2>
+        )
+	}
+}
+
+// 渲染组件
+ReactDOM.render(<Count/>, document.getElementById("test"))
+```
+
+> 1、初始化阶段：由ReactDOM.render()触发----初次渲染
+>
+> ​	（1）constructor()
+>
+> ​	（2）componentWillMount()
+>
+> ​	（3）render()   必须，渲染组件
+>
+> ​	（4）componentDidMount()   常用，页面一上来就要做的事情非常适合在此钩子进行
+>
+> 2、更新阶段：由组件内部this.setState()或父组件render触发
+>
+> ​	（1）shouldComponentUpdate()
+>
+> ​	（2）componentWillUpdate()
+>
+> ​	（3）render()   必须，渲染组件
+>
+> ​	（4）componentDidUpdate()
+>
+> 3、卸载组件：由ReactDOM.unmountComponentAtNode()触发
+>
+> ​	（1）componentWillUnmount()  常用，一般在这个钩子中做一些收尾的事情
+
+### 2、新生命周期
+
+在新版本的React中，有三个钩子需要加`UNSAFE_`前缀：
+
+- componentWillReceiveProps()  =>  UNSAFE_componentWillReceiveProps()
+- componentWillMount()  =>  UNSAFE_componentWillMount()
+- componentWillUpdate()  =>  UNSAFE_componentWillUpdate
+
+也就是说**除了ComponentWillUnmount以外，所有属于Will的钩子都要加上`UNSAFE_`前缀**
+
+但实质上，这三个方法并没有什么存在感，经常存在误用和滥用
+
+新React生命周期流程：
+
+![捕获.PNG](https://i.loli.net/2021/04/04/3cR1ysYHhw5264l.png)
+
+> **新旧生命周期的区别：**旧生命周期即将废弃3个生命周期钩子，分别是：componentWillReceiveProps()，componentWillMount()和componentWillUpdate()，同时又添加了getDerivedStateFromProps()及getSnapshotBeforeUpdate（）两个新钩子
+
+#### getDerivedStateFromProps()
+
+此方法适用于罕见的用例，即 state 的值在任何时候都取决于 props。例如，实现 `<Transition>` 组件可能很方便，该组件会比较当前组件与下一组件，以决定针对哪些组件进行转场动画。
+
+```javascript
+// getDerivedStateFromProps静态方法，组件将要挂载的钩子
+// 该方法接收可一个参数-props
+static getDerivedStateFromProps(props) {
+    console.log("Count---getDerivedStateFromProps", props)
+    // 如果返回值是一个对象，那么这个组件中状态将以这里的return为主，而且不可修改
+    // return {
+    //   count: 108
+    // }
+    return props
+}
+```
+
+但是这个方法的场景非常罕见，了解即可。若state的值在任何时候都取决于props，那么可以使用该方法
+
+#### getSnapshotBeforeUpdate()
+
+```javascript
+// getSnapshotBeforeUpdate方法
+// 该方法必须返回一个快照值或者null值
+// 快照值可以是任何东西，字符串，数值均可
+getSnapshotBeforeUpdate() {
+    console.log("Count---getSnapshotBeforeUpdate")
+    return "snapshotValue"
+}
+```
+
+ 此外，该方法返回的snapshot（快照）在componentDidUpdate()方法中得到使用
+
+```javascript
+// componentDidUpdate方法，组件更新完成的钩子
+// 该方法可以接收三个参数：prevProps, prevState, snapshotValue
+// prevProps指的是在更新前的props
+// prevState指的是在更新前的state
+// snapshotValue是从方法getSnapshotBeforeUpdate()返回值中获取的快照
+componentDidUpdate(prevProps, prevState, snapshotValue) {
+    console.log("Count---componentDidUpdate", prevProps, prevState, snapshotValue)
+}
+```
+
+但是这个方法的使用也非常罕见，只在极少数特殊情况下使用
+
+## 四、Diffing算法
+
+### 1、算法策略
+
+React的调和算法，主要发生在render阶段，调和算法并不是一个特定的算法函数，而是指在调和过程中，为提高构建workInProcess树的性能，以及Dom树更新的性能，而采用的一种策略，又称diffing算法。 在React 的官网上描述“Diffing” 算法时，提到了“diffing two trees”，但是在源码实现时，并不是创建好两棵树后，再从上往下的diffing这两棵树。这个diffing发生在搭建子节点时, 实际是新生成的ReactElement 与 current树上fibe节点的diffing。 为了将diffing算法的时间复杂度控制在O(n)（树diff的时间复杂度涉及到树的编辑距离，可以看这里）, 采用了如下策略：
+
+1）只比较同层级的节点
+
+2）对于单节点比较，如果当前节点type 和 key 不相同，不再比较其下子节点，直接删掉该节点及其下整棵子树，根据ReactElement重新生成节点树。因为React认为不同类型的组件生成的树形结构不一样，不必复用。
+
+3）如果子节点是数组，可根据唯一的key值定位节点进行比较，这样即使子节点顺序发生变化，也可以根据key值进行复用。
+
+值得注意的是，**所有节点的diffing都会比较key，key 默认值为null。若是没有设置，则null是恒等于null的，认为key是相同的**。
+
+### 2、Key的相关问题
+
+**虚拟DOM中key的作用**
+
+1）简单的说：key是虚拟DoM对象的标识，在更新显示时key起着极其重要的作用
+
+2）详细的说：当状态中的数据发生变化时， react会根据【新数据】生成【新的虚拟DOM】，随后 React进行【新虚拟DOM】与【旧虚拟DOM】的diffing比较，比较规则如下：
+
+a、旧虚拟DOM中找到了与新虚拟DOM相同的key：
+
+（1）若虚拟DOM中内容没变，直接使用之前的真实DON
+
+（2）若虚拟DOM内容变了，则生成新的真实DOM，随后替换掉页面中之前的真实DOM
+
+b、旧虚拟DOM中未找到与新虚拟DOM相同的key根据数据创建新的真实DOM，随后渲染到到页面
+
+**用index作为key可能会引发的问题**
+
+1、若对数据进行：逆序添加、逆序删除等破坏顺序操作：
+
+​		会产生没有必要的真实DOM更新 ==> 界面效果没问题，但效率低
+
+2、如果结构中还包含输入类的DOM：
+
+​		会产生错误DOM更新 ==> 界面有问题
+
+3、如果不存在对数据的逆序添加、逆序删除等破坏顺序操作，仅用于渲染列表用于展示，使用 index作为key是没有问题的
+
+**开发中如何选择key**
+
+1、最好使用每条数据的唯一标识作为key，比如id、手机号、身份证号、学号等唯一值
+
+2、如果确定只是简单的展示数据，用 index也是可以的
+
+## 五、React应用
+
+### 1、React脚手架
+
+脚手架：用于帮助程序员快速创建一个基于某库的模板项目
+
+项目的整体架构：React + webpack + EcmaScript6 + eslint
+
+使用脚手架开发的项目特点：模块化、组件化、工程化
+
+### 2、使用脚手架构建
+
+**第一步**，全局安装：`npm install -g create-react-app`
+
+**第二步**，切换到想创建项目的目录，使用命令：`create-react-app hello-react`
+
+**第三步**，进入项目文件夹：`cd hello-react`
+
+**第四步**，启动项目：`npm start`
+
+### 3、脚手架文件说明
+
+**public — 静态资源文件夹**
+
+favicon.icon — 网站偏爱图标
+
+index.html — 主页面
+
+logo192.png — logo图
+
+ogo512 — logo图
+
+manifest.json — 应用加壳的配置文件
+
+robots.txt — 爬虫协议文件
+
+**src — 源码文件夹**
+
+App.css — App组件的样式
+
+App.js — App组件
+
+App.test.js — 给App测试
+
+index.css — 样式
+
+index.js — 入口文件
+
+logo.svg — logo图
+
+reportWebVitals.js — 页面性能分析文件（需要web-vitals库的支持）
+
+setupTests.js — 组件单元测试的文件（需要jest-dom库的支持）
+
+#### （1）public/index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!--  %PUBLIC_URL%代表的是public文件夹的路径  -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <!--  开启理想视口，用于做移动端网页适配  -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--  用于配置浏览器页签 + 地址栏的颜色，只针对安卓手机浏览器  -->
+    <meta name="theme-color" content="#000000" />
+    <!--  描述网站信息  -->
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <!--  用于指定网页添加到iPhone主屏幕后的图标  -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!--  应用加壳时的配置文件  -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>React App</title>
+  </head>
+  <body>
+    <!--  用于提示不支持Javascript的浏览器时展示，若浏览器支持则不显示  -->
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
+```
+
+#### （2）src/index.js
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
+// 用于记录页面性能，里面使用了web-vitals库
+import reportWebVitals from './reportWebVitals';
+
+ReactDOM.render(
+  // <React.StrictMode>用处：检查<App />及<App />内部所有子组件不合理的地方
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+
+reportWebVitals();
+```
+

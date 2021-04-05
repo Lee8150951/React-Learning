@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 准备容器 -->
+  <div id="test"></div>
+
+  <!-- 引入react核心库 -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <!-- 引入react-dom，用于操作dom -->
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <!-- 引入babel，用于将jsx转化为js，将ES6转化为ES5语法 -->
+  <script type="text/javascript" src="../assets/react-0.14.3/build/babel.min.js"></script>
+
+  <script type="text/babel">
+    class Demo extends React.Component {
+      // 构造器方法，完成初始化工作
+      constructor(props) {
+        console.log('Count---constructor')
+        super(props)
+        // 初始化状态
+        this.state = {count: 0}
+      }
+
+      // 加一方法
+      add = () => {
+        let {count} = this.state
+        this.setState({count: count + 1})
+      }
+      // 卸载组件方法
+      death = () => {
+        ReactDOM.unmountComponentAtNode(document.getElementById('test'))
+      }
+
+      // componentWillMount方法，组件将要挂载的钩子
+      componentWillMount() {
+        console.log("Count---componentWillMount")
+      }
+
+      // render方法，渲染时的钩子
+      render() {
+        console.log("Count---render")
+        const {count} = this.state
+        return (
+          <div>
+            <h2>当前求和：{count}</h2>
+            <button onClick={this.add}>Click +1</button>
+            <button onClick={this.death}>Death</button>
+          </div>
+        )
+      }
+
+      // componentDidMount方法，挂载完成后的钩子
+      componentDidMount() {
+        console.log("Count---componentDidMount")
+      }
+
+      // componentWillUnmount方法，卸载组件前的钩子
+      componentWillUnmount() {
+        console.log("Count---componentWillUnmount")
+      }
+
+      // shouldComponentUpdate方法，相当于一个阀门，控制setState方法是否能修改状态
+      // 默认返回的是true，如果返回false，将无法进行任何组件state的更新
+      shouldComponentUpdate() {
+        console.log("Count---shouldComponentUpdate")
+        return true
+      }
+
+      // componentWillUpdate方法，组件将要更新的钩子
+      componentWillUpdate() {
+        console.log("Count---componentWillUpdate")
+      }
+
+      // componentDidUpdate方法，组件更新完成的钩子
+      componentDidUpdate() {
+        console.log("Count---componentDidUpdate")
+      }
+    }
+    
+    class A extends React.Component {
+      // 初始化状态
+      state = {
+        carName: 'Lexus'
+      }
+
+      changeCar = () => {
+        this.setState({
+          carName: 'Benz'
+        })
+      }
+
+      render() {
+        return (
+          <div>
+            <h2>A组件</h2>
+            <B carName={this.state.carName}/>
+            <button onClick={this.changeCar}>Change</button>
+          </div>
+        )
+      }
+    }
+
+    class B extends React.Component {
+      // componentWillReceiveProps方法，父组件传递props值调用的钩子
+      // 第一传的Props不算
+      componentWillReceiveProps() {
+        console.log("B---componentWillReceiveProps");
+      }
+      render() {
+        return (
+          <h2>B组件，接收：{this.props.carName}</h2>
+        )
+      }
+    }
+    
+    // 渲染组件
+    ReactDOM.render(<Demo/>, document.getElementById("test"))
+  </script>
+</body>
+</html>
