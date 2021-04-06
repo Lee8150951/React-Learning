@@ -1225,3 +1225,74 @@ ReactDOM.render(
 reportWebVitals();
 ```
 
+### 4、Hello React
+
+项目目录：
+
+![1.PNG](https://i.loli.net/2021/04/06/A9NdlbjVOL6RWnt.png)
+
+在src/components目录中下辖的每一个文件夹代表的都是一个个组件，每一个组件由css和主核心的jsx（或js）文件构成
+
+Hello.jsx：
+
+```javascript
+import React, {Component} from 'react'
+import './Hello.css'
+
+export default class Hello extends Component {
+  render() {
+    return <h1 className="title">Hello, React</h1>
+  }
+}
+```
+
+Hello.css：
+
+```css
+.title {
+    background-color: orange;
+}
+```
+
+然后在作为外壳组件的App.js中进行引入（实际上可以将App.js理解成最外层的一个大组件，在大组件中集成小组件进行统一引入）
+
+```javascript
+// 引入React
+import React, {Component} from 'react'
+
+// 引入组件
+import Hello from './components/Hello/Hello'
+import Welcome from "./components/Welcome/Welcome";
+
+// 创建外壳组件App
+export default class App extends Component {
+  render() {
+    return (
+        <div>
+          <Hello/>
+          <Welcome/>
+        </div>
+    )
+  }
+}
+```
+
+最后于index.js（入口文件）中进行渲染
+
+```javascript
+// 引入React核心库
+import React from 'react'
+// 引入ReactDOM
+import ReactDOM from 'react-dom'
+// 引入App组件
+import App from './App'
+
+// 渲染App到页面
+ReactDOM.render(<App/>, document.getElementById('root'))
+```
+
+使用`npm start`命令将整个项目跑起来
+
+![1.PNG](https://i.loli.net/2021/04/06/Fj86nfiRlwvc7Vz.png)
+
+> 在WebStorm和VScode（需安装ES7 React插件）中使用`rcc`直接快速构建类式组件，使用`rfc`直接快速构建函数值组件

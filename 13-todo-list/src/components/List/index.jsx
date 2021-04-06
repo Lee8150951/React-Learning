@@ -1,0 +1,32 @@
+import React, {Component} from 'react';
+import PropTypes from "prop-types"
+
+import './index.css'
+
+import Item from "../Item";
+
+class List extends Component {
+  // 对接受的props进行类型和必要性的限制
+  static propTypes = {
+    todos: PropTypes.array.isRequired,
+    updateTodo: PropTypes.func.isRequired,
+    deleteTodo: PropTypes.func.isRequired
+  }
+
+  render() {
+    const {todos, updateTodo, deleteTodo} = this.props
+    return (
+        <div>
+          <ul className="todo-main">
+            {
+              todos.map((todo) => {
+                return <Item {...todo} key={todo.id} updateTodo={updateTodo} deleteTodo={deleteTodo}/>
+              })
+            }
+          </ul>
+        </div>
+    );
+  }
+}
+
+export default List;
