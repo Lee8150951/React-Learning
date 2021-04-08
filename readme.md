@@ -1296,3 +1296,24 @@ ReactDOM.render(<App/>, document.getElementById('root'))
 ![1.PNG](https://i.loli.net/2021/04/06/Fj86nfiRlwvc7Vz.png)
 
 > 在WebStorm和VScode（需安装ES7 React插件）中使用`rcc`直接快速构建类式组件，使用`rfc`直接快速构建函数值组件
+
+## 六、React Ajax
+
+### 1、理解
+
+1、React本身只关注与界面，并不包含发送Ajax请求的代码
+
+2、前端应用需要通过Ajax请求与后台进行交互（json数据）
+
+3、React应用中需要集成第三方Ajax库（或者自己封装）
+
+### 2、常用的Ajax请求库
+
+jQuery（比较重，如果需要另外引入不建议使用）
+
+axios（轻量级，建议使用）
+
+axios具有promise风格，可以在浏览器端和node服务器端
+
+### 3、Axios
+
