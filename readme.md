@@ -1315,5 +1315,282 @@ axios（轻量级，建议使用）
 
 axios具有promise风格，可以在浏览器端和node服务器端
 
-### 3、Axios
+详见博客：[通过setupProxy在React中配置axios](https://lee8150951.github.io/blog/article/react/react-axios.html#axios%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95)
 
+## 补充：消息订阅与发布机制
+
+### 原生写法
+
+在React原生环境下是不支持兄弟组件之间的信息直接进行通讯的，只能使用最为原始的方法：
+
+假设父组件X下拥有两个子组件分别是：组件a和组件b，组件a、b就互为一对兄弟组件，此时子组件a要将内部的一组数据传给子组件b，要做的操作就必须是组件a将信息传递给父组件X，组件b通过props从父组件X处获取这些信息。流程示意如下：
+
+![flow.PNG](https://i.loli.net/2021/04/13/F7beSfWMPugZyzs.png)
+
+父组件：
+
+```javascript
+class App extends Component {
+  state = {
+    // users初始值为数组
+    users: [],
+    // 是否为第一次打开页面
+    isFirst: true,
+    // 标识加载中
+    isLoading: false,
+    // 存储错误信息
+    err: ''
+  }
+
+  // 更新App的state
+  updateAppState = (stateObj) => {
+    this.setState(stateObj)
+  }
+
+  render() {
+    return (
+      <div className="container">
+        <Search updateAppState={this.updateAppState}/>
+        {/*批量传递*/}
+        <List {...this.state}/>
+      </div>
+    );
+  }
+}
+```
+
+子组件a：
+
+```javascript
+import React, {Component} from 'react';
+import axios from "axios";
+
+class Search extends Component {
+  myRef = React.createRef()
+
+  search = () => {
+    const myRef = this.myRef.current.value
+    // 发送请求前通知app更新状态
+    this.props.updateAppState({
+      isFirst: false,
+      isLoading: true
+    })
+    // 发送网络请求
+    axios.get(`/api/search/users?q=${myRef}`).then(
+      response => {
+        // 发送请求后通知app更新状态
+        this.props.updateAppState({
+          isLoading: false,
+          users: response.data.items
+        })
+      },
+      error => {
+        // 请求失败后的状态
+        this.props.updateAppState({
+          isLoading: false,
+          err: '请求出错'
+        })
+      }
+    )
+  }
+
+  render() {
+    return (
+      <section className="jumbotron">
+        <h3 className="jumbotron-heading">搜索GitHub用户</h3>
+        <div>
+          <input ref={this.myRef} type="text" placeholder="输入关键字搜索"/>&nbsp;
+          <button onClick={this.search}>搜索</button>
+        </div>
+      </section>
+    );
+  }
+}
+
+export default Search;
+```
+
+子组件b：
+
+```javascript
+import React, {Component} from 'react';
+
+import './index.css'
+
+class List extends Component {
+  render() {
+    const {users, isLoading, isFirst, err} = this.props
+    return (
+      <div className="row">
+        {
+          isFirst ? <h2>输入关键字搜索后展示</h2> :
+            isLoading ? <h2>Loading...</h2> :
+              err ? <h2 style={{color: 'red'}}>{err}</h2> :
+                users.map((userObj) => {
+                  return (
+                    <div key={userObj.id} className="card">
+                      <a href={userObj.html_url} target="_blank" rel="noreferrer">
+                        <img alt="avatar" src={userObj.avatar_url} style={{width: '100px'}}/>
+                      </a>
+                      <p className="card-text">{userObj.login}</p>
+                    </div>
+                  )
+                })
+        }
+      </div>
+    );
+  }
+}
+
+export default List;
+```
+
+### PubSubJS
+
+pubsub.js是基于React的拓展库，解决了兄弟组件之间通讯困难的问题，通过该拓展库React项目可以直接通过**消息订阅与发布**的方式进行组件间的通讯
+
+可以将其通俗的理解成：
+
+- 绑定事件监听 ==> 订阅消息
+- 触发事件 ==> 发布消息
+
+#### 安装命令
+
+```shell
+yarn add pubsub-js
+```
+
+#### 常用方法
+
+- 发送消息：`PubSub.publish(名称,参数)`
+- 订阅消息：`PubSub.subscrib(名称,函数)`
+- 取消订阅：`PubSub.unsubscrib(名称)`
+
+在使用了pubsub.js模块后，父组件变得非常简单，只需要最基本的渲染功能即可
+
+**值得注意的是：state属性哪个组件使用就放在哪个组件之上**
+
+父组件：
+
+```javascript
+import React, {Component} from 'react';
+
+import Search from "./components/Search";
+import List from "./components/List";
+
+
+class App extends Component {
+
+  render() {
+    return (
+      <div className="container">
+        <Search/>
+        <List/>
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+发送组件：
+
+```javascript
+import React, {Component} from 'react';
+import PubSub from 'pubsub-js'
+import axios from "axios";
+
+class Search extends Component {
+  myRef = React.createRef()
+
+  search = () => {
+    const myRef = this.myRef.current.value
+    // 发送请求前通知List更新状态
+    PubSub.publish('flag', {
+      isFirst: false,
+      isLoading: true
+    })
+    // 发送网络请求
+    axios.get(`/api/search/users?q=${myRef}`).then(
+      response => {
+        // 发送请求后通知List更新状态
+        PubSub.publish('flag', {
+          isLoading: false,
+          users: response.data.items
+        })
+      },
+      error => {
+        // 请求失败后的状态
+        PubSub.publish('flag', {
+          isLoading: false,
+          err: error.message
+        })
+      }
+    )
+  }
+
+  render() {
+    return (
+      <section className="jumbotron">
+        <h3 className="jumbotron-heading">搜索GitHub用户</h3>
+        <div>
+          <input ref={this.myRef} type="text" placeholder="输入关键字搜索"/>&nbsp;
+          <button onClick={this.search}>搜索</button>
+        </div>
+      </section>
+    );
+  }
+}
+
+export default Search;
+```
+
+接收渲染组件：
+
+```javascript
+import React, {Component} from 'react';
+import PubSup from 'pubsub-js'
+import './index.css'
+
+class List extends Component {
+  state = {
+    users: [],
+    isFirst: true,
+    isLoading: false,
+    err: ''
+  }
+
+  // 订阅消息事件：当组件一旦创建就应该订阅消息
+  componentDidMount() {
+    PubSup.subscribe('flag', (msg, data) => {
+      this.setState(data)
+    })
+  }
+
+  render() {
+    const {users, isLoading, isFirst, err} = this.state
+    return (
+      <div className="row">
+        {
+          isFirst ? <h2>输入关键字搜索后展示</h2> :
+            isLoading ? <h2>Loading...</h2> :
+              err ? <h2 style={{color: 'red'}}>{err}</h2> :
+                users.map((userObj) => {
+                  return (
+                    <div key={userObj.id} className="card">
+                      <a href={userObj.html_url} target="_blank" rel="noreferrer">
+                        <img alt="avatar" src={userObj.avatar_url} style={{width: '100px'}}/>
+                      </a>
+                      <p className="card-text">{userObj.login}</p>
+                    </div>
+                  )
+                })
+        }
+      </div>
+    );
+  }
+}
+
+export default List;
+```
