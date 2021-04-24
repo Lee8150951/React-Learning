@@ -1594,3 +1594,137 @@ class List extends Component {
 
 export default List;
 ```
+
+## 七、React Router
+
+### 1、SPA应用
+
+- 单页Web应用（single page web application, SPA）
+- 整个应用只有**一个完整的页面**
+- 点击页面中的链接**不会刷新**页面，只会做页面的**局部更新**
+- 数据都需要通过ajax请求获取，并在前端异步展现
+
+### 2、路由
+
+路由实际上就是一种映射关系，每一个路由就是一组key-value，其中key表示路径，value可能是function也可能是component
+
+### 3、react-router-dom基本使用
+
+```shell
+# 安装
+yarn add react-router-dom
+```
+
+- react的一个插件库
+- 专门用来实现一个SPA应用
+- 基于React的项目基本都会使用到该库
+
+> 基本使用过程：
+>
+> （1）确定好界面中的导航区和展示区
+>
+> （2）导航区的a标签改为Link标签`<Link to="***">Demo</Link>`
+>
+> （3）展示区写Route标签进行路径匹配`<Route path="***" component={}/>`
+>
+> （4）<App>的最外面包裹一个`<BrowserRouter></BrowserRouter>`
+
+**路由组件和一般组件最重要的区别在于：路由组件收到的props里面有三个最重要的信息，分别是history、location、match**
+
+:::tip
+
+路由组件与一般组件对比：
+
+1、写法不同
+
+​	一般组件：<Demo/>
+
+​	路由组件：<Route path="/demo" component={Demo}/>
+
+2、存放位置不同
+
+​	一般组件：components文件夹中
+
+​	路由组件：pages文件夹中
+
+3、接收到的props不同
+
+​	一般组件：写组件标签时，传递什么就能收到什么
+
+​	路由组件：接受到三个固定的属性，分别是history、location、match
+
+:::
+
+如果在React中要实现点击路由按钮后有高亮效果，要使用<NavLink>标签
+
+<NavLink>有一个属性：activeClassName，该属性可以选择该Link被选中时展示出来的样式
+
+**注意**：在React中标签体内容是一个特殊的标签属性，可以通过`this.props.children`获取标签内容
+
+### 4、`<Switch>`标签的使用
+
+**使用switch标签可以显著提高路由匹配的效率**
+
+也就是说：如果不加Switch标签包裹路由，react会检索所有路由项，而添加Switch标签后当匹配到任意一个符合的路由项时React都将停止匹配，写法如下所示
+
+```html
+<Switch>
+    <Route path="/about" component={About}/>
+    <Route path="/home" component={Home}/>
+</Switch>
+```
+
+### 5、多级路径样式问题
+
+（1）`public/index.html`中引入样式文件不写`./`而写`/`（常用）
+
+（2）`public/index.html`中引入样式文件不写`./`而写`%PUBLIC_URL%`（常用）
+
+（3）使用`HashRouter`
+
+### 6、路由的匹配
+
+**模糊匹配**（默认）：Route标签内需要什么，Link就必须给到什么，顺序也必须符合要求，后面的链接无所谓
+
+```html
+<!--匹配成功-->
+<Link to="/home">Home</Link>
+<!--匹配成功-->
+<Link to="/home/a/b">Home</Link>
+<!--匹配失败-->
+<Link to="/a/home/b">Home</Link>
+
+<Switch>
+    <Route path="/home" component={Home}/>
+</Switch>
+```
+
+**精准匹配**：在Route标签中添加exact属性对精准匹配进行控制，完美对应才能够匹配成果
+
+```html
+<!--匹配成功-->
+<Link to="/home">Home</Link>
+<!--匹配失败-->
+<Link to="/home/a/b">Home</Link>
+<!--匹配失败-->
+<Link to="/a/home/b">Home</Link>
+
+<Switch>
+    <Route exact={true} path="/home" component={Home}/>
+</Switch>
+```
+
+### 7、Redirect的使用
+
+Redirect标签表示重定向，在React中常作为默认展示进行使用
+
+如果Route中所有path都没有匹配成功，会自动使用Redirect标签内的组件
+
+```html
+<Switch>
+    <Route path="/home" component={Home}/>
+    <Route path="/about" component={About}/>
+    <Redirect to="/about"/>
+</Switch>
+```
+
