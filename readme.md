@@ -1728,3 +1728,72 @@ Redirect标签表示重定向，在React中常作为默认展示进行使用
 </Switch>
 ```
 
+### 8、嵌套路由
+
+:::tip
+
+**注意：**
+
+1、注册子路由时要写上父路由的path路径
+
+2、路由的匹配是按照注册路由的顺序进行的
+
+:::
+
+```html
+<div>
+    <ul className="nav nav-tabs">
+        <li>
+            <MyNavLink to="/home/news">News</MyNavLink>
+        </li>
+        <li>
+            <MyNavLink to="/home/message">Message</MyNavLink>
+        </li>
+    </ul>
+    <div>
+        <Switch>
+            <Route path="/home/news" component={News}/>
+            <Route path="/home/message" component={Message}/>
+             <Redirect to="/home/news"/>
+        </Switch>
+    </div>
+</div>
+```
+
+### 9、路由参数传递
+
+#### （1）params参数
+
+params参数最明显的特点就是**通过path路径进行数据传递**
+
+- 路由链接（携带参数）：`<Link to='/demo/test/18/Lee'}>详情</Link>`
+
+- 注册路由（声明接收）：`<Route path="/demo/test/:age/:name" component={Test}/>`
+
+- 接收参数：`const {age, name} = this.props.match.params`
+
+#### （2）search参数
+
+使用Search方式进行参数的传递必须要使用到`querystring`这个包（内置于react中，无需下载）
+
+这个包的作用就是将一段search字符串转化为对象或者将对象转化为search字符串
+
+- 路由链接（携带参数）：`<Link to='/demo/test?age=18&name=Lee'}>详情</Link>`
+
+- 注册路由（无需声明，正常注册即可）：`<Route path="/demo/test" component={Test}/>`
+
+- 接收参数：`const {search} = this.props.location`
+- 解析参数：`const {age, name} = qs.parse(search.slice(1))`
+
+#### （3）state参数
+
+使用state方式进行参数传递的要点就是在使用to属性是传递的不仅仅是一个path路径，而应该传递一个包含路径和state的**对象**
+
+- 路由链接（携带参数）：`<Link to={{path: '/demo/test', state: {name: 'Lee', age: '18'}}}>详情</Link>`
+
+- 注册路由（无需声明，正常注册即可）：`<Route path="/demo/test" component={Test}/>`
+
+- 接收参数：`const {age, name} = this.props.location.state`
+
+**注意：使用该方法刷新也可以保留参数**
+
