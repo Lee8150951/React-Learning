@@ -9,7 +9,6 @@ React在整个业务中负责的是操作DOM呈现页面
 用于构建用户界面的JavaScript库，值得注意的是React只注意界面构建
 
 > 理解：React是一个将数据渲染成HTML视图的js库
->
 
 ### 2、React的特点
 
@@ -1797,3 +1796,283 @@ params参数最明显的特点就是**通过path路径进行数据传递**
 
 **注意：使用该方法刷新也可以保留参数**
 
+### 10、编程式路由导航
+
+```javascript
+replaceShow = (id, title) => {
+    // params参数
+    this.props.history.replace(`/home/message/detail/${id}/${title}`)
+    // search参数
+    this.props.history.replace(`/home/message/detail/?id=${msgObj.id}&title=${msgObj.title}`)
+    // state参数
+    this.props.history.replace(`/home/message/detail`, {id, title})
+}
+
+pushShow = (id, title) => {
+    // params参数
+    this.props.history.push(`/home/message/detail/${id}/${title}`)
+    // search参数
+    this.props.history.push(`/home/message/detail/?id=${msgObj.id}&title=${msgObj.title}`)
+    // state参数
+    this.props.history.push(`/home/message/detail`, {id, title})
+}
+```
+
+### 11、withRouter的使用
+
+withRouter函数可以解决非路由组件使用路由的问题
+
+作用是：**给一般组件挂以路由组件的功能（history相关的方法）**
+
+使用方法：
+
+```jsx
+import {withRouter} from 'reat-router-dom'
+
+class Header extends Component {...}
+
+export default withRouter(Header)
+```
+
+### 12、BrowserRouter与HashRouter
+
+- **底层原理不同：**
+
+  ​	BrowserRouter使用的是H5的history API，不兼容IE9及以下版本
+
+  ​	HashRouter使用的是URL的哈希值
+
+- **URL表现形式不同：**
+
+  ​	BrowserRouter的路径中没有#，例如：localhost:3000/demo/test
+
+  ​	HashRouter的路径中包含#，例如：localhost:3000/#/demo/test
+
+- **刷新后对路由state参数的影响不同：**
+
+  ​	BrowserRouter没有任何影响，因为state保存在history对象中
+
+  ​	HashRouter刷新后会导致路由state参数的丢失
+
+- HashRouter可以用于解决一些路径错误相关的问题
+
+## 八、Redux
+
+### 1、概述
+
+Redux是一个独立于专门用于做状态管理的JS库，但并不是React专有插件库
+
+**作用：集中式管理React应用中多个组件共享的状态**
+
+组件与Redux之间的交互示意图
+
+![1.jpg](https://i.loli.net/2021/04/26/ytSkbXvxi1L82oE.jpg)
+
+### 2、Redux使用
+
+**应该使用Redux的情况**
+
+> - 用户的使用方式复杂
+> - 不同身份的用户有不同的使用方式（比如普通用户和管理员）
+> - 多个用户之间可以协作
+> - 与服务器大量交互，或者使用了WebSocket
+> - View要从多个来源获取数据
+
+**不应该使用Redux的情况**
+
+> - 用户的使用方式非常简单
+> - 用户之间没有协作
+> - 不需要与服务器大量交互，也没有使用 WebSocket
+> - 视图层（View）只从单一来源获取数据
+
+Redux的设计理念：
+
+（1）Web 应用是一个状态机，视图与状态是一一对应的
+
+（2）所有的状态，保存在一个对象里面
+
+### 3、Redux三个核心概念
+
+#### （1）action
+
+1、动作的对象
+
+2、包含两个属性：
+
+- type：标识属性，值为字符串，唯一，必要属性
+- data：数据属性，值类型任意，可选属性
+
+3、例子：
+
+```javascript
+{
+    type: 'ADD_STUDENT',
+    data: {
+        name: 'tom',
+        age: 18
+    }
+}
+```
+
+#### （2）reducer
+
+1、用于初始化状态、加工状态
+
+2、加工时，根据旧的static和action，产生新的state的**纯函数**
+
+#### （3）store
+
+1、将state、action、reducer联系在一起的对象
+
+2、如何获取到此对象？
+
+- `import {createStore} from 'redux'`
+- `import reducer from './reducers'`
+- `const store = createStore(reducer)`
+
+3、此对象的功能
+
+- `getState()`：得到state
+- `dispatch(action)`：分发action，触发reducer调用，产生新的state
+- `subscribe(listener)`：注册监听，当产生了新的state时，自动调用
+
+### 4、案例（精简版求和）
+
+Ⅰ、src文件夹下新建：
+
+-- redux
+
+​	-- store.js
+
+​	-- count_reducer.js
+
+Ⅱ、store.js：
+
+1）引入redux中createStore函数，创建一个store
+
+2）createStore调用时要传入一个为其服务的reducer
+
+3）记得暴露store对象
+
+```javascript
+/*
+* 该文件专门用于暴露一个store对象，整个应用也只有一个store对象
+*/
+
+// 引入createStore专门用于创建redux中最为核心的store对象
+import {createStore} from 'redux'
+// 引入为count服务的reducer
+import countReducer from './count_reducer'
+// 默认暴露store对象
+export default createStore(countReducer)
+```
+
+Ⅲ、count_reducer.js：
+
+1）reducer的本质就是一个函数，接收：preState，action，返回加工后的状态
+
+2）reducer的两个作用：初始化状态，加工状态
+
+3）reducer第一次被调用时，是store自动触发的，传递的preState是undefined
+
+```javascript
+/*
+* 1、该文件用于创建一个为Count组件服务的reducer，reducer的本质是一个函数
+* 2、reducer函数会接到两个参数，分别是：之前的状态（preState），动作对象（action）
+*/
+// 初始化preState
+const iniState = 0
+export default function countReducer(preState = iniState, action) {
+  // 从action对象中获取type、data
+  const {type, data} = action
+  // 根据type决定如何加工数据
+  switch (type) {
+    case 'increment':// 加
+      return preState + data
+    case 'decrement':// 减
+      return preState - data
+    default:// 初始化状态
+      return preState
+  }
+}
+```
+
+Ⅳ、在index.js中检测store中状态的改变，一旦发生改变重新渲染`<App/>`
+
+> 注意：redux只负责状态的管理，至于状态的改变驱动页面的展示则需要我们自己来写
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import store from './redux/store'
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+
+store.subscribe(() => {
+  ReactDOM.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    document.getElementById('root')
+  );
+})
+```
+
+### 5、action的基本使用
+
+前面的案例都是基于最精简没有action的操作时的，但是事实上redux是希望用action对状态进行统一的管理
+
+在redux文件夹中新建count_action.js将原本写在模块中的方法写入
+
+```javascript
+/*
+  该文件专门用于为Count组件生成action对象
+*/
+import {INCREMENT, DECREMENT} from './constant'
+// 加法
+export const createIncrementAction = data => {
+  return {type: INCREMENT, data}
+}
+// 减法
+export const createDecrementAction = data => {
+  return {type: DECREMENT, data}
+}
+```
+
+模块中的方法可以直接使用action中的方法进行精简
+
+```javascript
+// 加法
+increment = () => {
+    const {value} = this.selectNumber
+    store.dispatch(createIncrementAction(value * 1))
+}
+
+// 减法
+decrement = () => {
+    const {value} = this.selectNumber
+    store.dispatch(createDecrementAction(value * 1))
+}
+```
+
+### 6、异步action
+
+Ⅰ、延迟的动作不想交给组件本身才会使用异步action
+
+Ⅱ、何时需要使用异步action：想要对状态进行操作，但是具体的数据靠异步任务返回
+
+Ⅲ、具体编码：
+
+​	1）`yarn add redux-thunk`，并配置在store中
+
+​	2）创建action的函数不再返回一般对象，而是一个函数，该函数中写异步任务
+
+​	3）异步任务有结果后，分发一个同步的action去真正操作数据
+
+Ⅳ、异步的action不是必须要写的，完全可以自己等待异步任务结束后再去分发同步action
