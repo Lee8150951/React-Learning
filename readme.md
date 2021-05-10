@@ -2076,3 +2076,235 @@ decrement = () => {
 ​	3）异步任务有结果后，分发一个同步的action去真正操作数据
 
 Ⅳ、异步的action不是必须要写的，完全可以自己等待异步任务结束后再去分发同步action
+
+## 九、React-Redux
+
+### 1、react-redux模型
+
+:::tip
+
+①所有的UI组件都应该包裹在一个容器组件中，他们是父子关系
+
+②容器组件是真正与redux打交道的，里面可以随意使用redux的API
+
+③UI组件中不能使用任何redux中的API
+
+④容器组件会传给UI组件：redux中所保存的状态，用于操作状态的方法
+
+⑤容器给UI组件传递：状态、状态操作的方法，且均通过props传递
+
+:::
+
+![demo.PNG](https://i.loli.net/2021/05/10/Uy7DY6rKTxjVenR.png)
+
+### 2、基本使用方法
+
+（1）明确两个基本概念：
+
+- UI组件：不能使用任何redux的API，只负责页面的呈现、交互等等
+- 容器组件：负责和redux进行交互，将结果交给UI组件
+
+（2）如何创建一个容器组件--靠react-redux的connect函数
+
+- connect(mapStateToProps, mapDispatchToProps)(UI组件)
+  - mapStateToProps：映射状态，返回值是一个对象
+  - mapDispatchToProps：映射操作状态的方法，返回值是一个对象
+
+（3）容器组件中的store是靠props传进去的，而不是在容器组件中直接引入
+
+容器组件（优化前）
+
+```javascript
+// 引入Count的UI组件
+import CountUI from '../../components/Count'
+// 引入用于连接UI组件与redux的方法
+import {connect} from 'react-redux'
+// 引入Redux的reducer
+import {createIncrementAction, createDecrementAction, createIncrementAsyncAction} from '../../redux/count_action'
+
+// a函数返回的对象中的key就作为传递给UI组件props中的key，value就作为传递给UI组件props的value----状态
+function mapStateToProps (state) {
+  return {
+    count: state
+  }
+}
+
+// b函数返回的对象中的key就作为传递给UI组件props中的key，value就作为传递给UI组件props的value----操作状态的方法
+function mapDispatchToProps (dispatch) {
+  return {
+    increment: (data) => {
+      // 通知redux执行加法
+      dispatch(createIncrementAction(data))
+    },
+    decrement: (data) => {
+      // 通知redux执行减法
+      dispatch(createDecrementAction(data))
+    },
+    incrementAsync: (data, time) => {
+      // 通知redux执行异步加法
+      dispatch(createIncrementAsyncAction(data, time))
+    }
+  }
+}
+
+// 使用connect()()创建并暴露一个Count的容器组件
+export default connect(mapStateToProps, mapDispatchToProps)(CountUI)
+```
+
+### 3、mapDisptch优化
+
+```javascript
+// 引入Count的UI组件
+import CountUI from '../../components/Count'
+// 引入用于连接UI组件与redux的方法
+import {connect} from 'react-redux'
+// 引入Redux的reducer
+import {createIncrementAction, createDecrementAction, createIncrementAsyncAction} from '../../redux/count_action'
+
+// 使用connect()()创建并暴露一个Count的容器组件
+export default connect(
+  state => ({
+    count: state
+  }),
+
+  // mapDispatchToProps简写
+  {
+    increment: createIncrementAction,
+    decrement: createDecrementAction,
+    incrementAsync: createIncrementAsyncAction
+  }
+)(CountUI)
+```
+
+**mapDispatchToProps可以传两种值：①函数；②对象**
+
+使用函数是一种最为基本的方式，而对象的方式是react-redux一种优化的API，在使用这种方式进行传值时，不需要再进行dispatch操作
+
+**react-redux会自动进行dispatch操作**
+
+### 4、index.js优化
+
+在使用react-redux插件后，index.js（入口文件）可以不再像直接使用redux那样监控跟踪render
+
+直接按照正常方式渲染即可
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+```
+
+### 5、Provider组件优化
+
+使用react-redux插件后，不需要再分别给每个组件传入store，直接在index.js中使用Provider将整个`<App/>`包裹起来即可
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import store from './redux/store'
+import {Provider} from "react-redux"
+
+ReactDOM.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+```
+
+### 6、UI组件与容器组件的整合优化
+
+为简化文件架构，将components与containers文件夹进行整合，合并为一个文件
+
+```javascript
+import React, {Component} from 'react';
+// 引入用于连接UI组件与redux的方法
+import {connect} from 'react-redux'
+// 引入Redux的reducer
+import {createIncrementAction, createDecrementAction, createIncrementAsyncAction} from '../../redux/count_action'
+
+// UI组件
+class Count extends Component {
+  // 加法
+  increment = () => {
+    const {value} = this.selectNumber
+    this.props.increment(value * 1)
+  }
+
+  // 减法
+  decrement = () => {
+    const {value} = this.selectNumber
+    this.props.decrement(value * 1)
+  }
+
+  // 奇数再加
+  incrementIfOdd = () => {
+    const {value} = this.selectNumber
+    if (this.props.count % 2 !== 0) {
+      this.props.increment(value * 1)
+    }
+  }
+
+  // 异步加
+  incrementAsync = () => {
+    const {value} = this.selectNumber
+    this.props.incrementAsync(value * 1, 500)
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>当前求和为：{this.props.count}</h1>
+        <select ref={c => this.selectNumber = c}>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>&nbsp;
+        <button onClick={this.increment}>+</button>&nbsp;
+        <button onClick={this.decrement}>-</button>&nbsp;
+        <button onClick={this.incrementIfOdd}>当前求和为奇数再加</button>&nbsp;
+        <button onClick={this.incrementAsync}>异步加</button>
+      </div>
+    );
+  }
+}
+
+// 使用connect()()创建并暴露一个Count的容器组件
+export default connect(
+  state => ({
+    count: state
+  }),
+
+  {
+    increment: createIncrementAction,
+    decrement: createDecrementAction,
+    incrementAsync: createIncrementAsyncAction
+  }
+)(Count)
+```
+
+### 7、优化总结
+
+:::tip
+
+- 容器组件和UI组件混合成为一个文件
+- 无需自己给容器组件传递store，给`<App/>`包裹一个`<Provider store={store}>`即可
+- 使用了react-redux后不用自己检测redux中状态的改变，容器组件可以自动完成这个工作
+- mapDispatch可以简单的写成一个对象
+- 一个组件要和redux需要经过的步骤
+  - 定义UI组件但是不需要暴露
+  - 引入connect形成容器组件，并暴露
+  - 在UI组件中通过this.props.xxx进行读取和操作状态
+
+:::
+
