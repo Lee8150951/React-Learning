@@ -2308,3 +2308,33 @@ export default connect(
 
 :::
 
+## 十、Redux数据共享
+
+注意在store.js文件中整合reducers文件时，使用combineReducers方法进行整合，合并成一个AllReducer后进行统一引入
+
+```javascript
+/*
+* 该文件专门用于暴露一个store对象，整个应用也只有一个store对象
+*/
+
+// 引入createStore专门用于创建redux中最为核心的store对象
+import {createStore, applyMiddleware, combineReducers} from 'redux'
+// 引入为count服务的reducer
+import countReducer from './reducers/count'
+// 引入为person服务的reducer
+import personReducer from "./reducers/person";
+// 引入redux-thunk，用于支持异步action
+import thunk from 'redux-thunk'
+
+// 合并reducer
+// 这里的对象是不同的reducer对应的不同key-value键值对
+const allReducer = combineReducers({
+  count: countReducer,
+  person: personReducer
+})
+// 默认暴露store对象
+export default createStore(allReducer, applyMiddleware(thunk))
+```
+
+相当于将reducers构建成为了一个包含多个键值对的集合，在使用时直接根据key直接进行调用即可
+
